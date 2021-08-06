@@ -1,7 +1,4 @@
-import {
-  DataTypes, Model, BelongsToManyAddAssociationsMixin, HasManyAddAssociationsMixin,
-  HasManyAddAssociationMixin, BelongsToManyAddAssociationMixin, BelongsToManyRemoveAssociationMixin,
-} from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 import { dbType } from './index';
 import { sequelize } from './sequelize';
 import User from './user';
@@ -31,8 +28,8 @@ Board.init({
 });
 
 export const associate = (db: dbType) => {
+  // Board 는 User 에 연관되어있으니깐 belongsTo
   db.Board.belongsTo(db.User);
-  db.Board.belongsToMany(db.User, { through: 'Like', as: 'Likers' });
 };
 
 export default Board;

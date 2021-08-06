@@ -15,7 +15,7 @@ class User extends Model {
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  public readonly Board?: Board[];
+  public readonly Boards?: Board[];
 
   public getBoards!: HasManyGetAssociationsMixin<Board>;
 }
@@ -42,6 +42,7 @@ User.init({
 // N:M 관계 : belongsToMany
 
 export const associate = (db: dbType) => {
+  // User는 게시판을 여러개 가지고 있어서 hasMany
   db.User.hasMany(db.Board, { as: 'Boards' });
 };
 
