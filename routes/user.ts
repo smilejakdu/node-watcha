@@ -4,16 +4,12 @@ import { Request } from 'express';
 import bcrypt from 'bcrypt';
 import passport from 'passport';
 
-import { isLoggedIn, isNotLoggedIn } from './middleware';
 import User from '../models/user';
 import Board from '../models/board';
+import jwt from "jsonwebtoken";
+import { jwtObj } from "../config/jwt"
 
 const router = express.Router();
-
-router.get('/', isLoggedIn, (req, res) => {
-    const user = req.user!.toJSON() as User;
-    return res.json({ ...user, password: null });
-});
 
 router.post('/signup', async (req, res, next) => {
     console.log("req result: " , req.body);
@@ -39,6 +35,44 @@ router.post('/signup', async (req, res, next) => {
         console.error(error);
         next(error);
     }
+});
+
+
+router.post('/login', async (req, res, next) => {
+  passport.authenticate('local', (err: Error, user: User, info: { message: string }) => {
+    console.log("login result: " , req.body);
+    if (err) {
+        console.error(err);
+        return next(err);
+    }
+    if (info) {
+        return res.status(401).send(info.message);
+    }
+    console.log("login user : " , user);
+    return req.login(user, async (loginErr: Error) => {
+      try {
+        if (loginErr) {
+          return next(loginErr)
+        }
+        const fullUser = await User.findOne({
+          where: { id: user.id },
+          include: [{
+            model: Board,
+            as: 'Boards',
+            attributes: ['id'],
+          }],
+          attributes: { exclude: ['password'] },
+        });
+        // jwt token 생성
+        // const token = jwt.sign({ id: user.id }, jwtObj.secret , {algorithm : 'RS256'});
+        // fullUser.token = token;
+        return res.json(fullUser);
+      } catch (e) {
+        console.error(e);
+        return next(e);
+      }
+    });
+  })(req, res, next);
 });
 
 export default router;

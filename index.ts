@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import passport from 'passport';
 import hpp from 'hpp';
 import helmet from 'helmet';
-
+import passportConfig from './passport';
 import { sequelize } from './models';
 
 import userRouter from './routes/user';
@@ -22,7 +22,7 @@ sequelize.sync({ force: false })
   .catch((err: Error) => {
     console.error(err);
   });
-
+passportConfig();
 if (prod) {
   app.use(hpp());
   app.use(helmet());
@@ -31,10 +31,9 @@ if (prod) {
   app.use(morgan('dev'));
 }
 
+app.use(passport.initialize());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.use('/users', userRouter);
 
