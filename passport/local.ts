@@ -1,14 +1,16 @@
-import passport from 'passport';
-import bcrypt from 'bcrypt';
+import * as passport from 'passport';
+import * as bcrypt from 'bcrypt';
 import { Strategy } from 'passport-local';
 
 import User from '../models/user';
 
 export default () => {
-  passport.use('local', new Strategy({
+  passport.use('local', new Strategy({ // IStrategyOptions
     nicknameField: 'nickname',
     passwordField: 'password',
-  }, async (nickname, password, done) => {
+  }, async (nickname, password, done) => { // VerifyFunction
+    console.log("local nickname : " , nickname);
+    console.log("local password : " , password); 
     try {
       const user = await User.findOne({ where: { nickname } });
       if (!user) {

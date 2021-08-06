@@ -1,10 +1,11 @@
-import express from 'express';
+import * as express from 'express';
 import { RequestHandler, ErrorRequestHandler, Request, Response, NextFunction } from 'express';
-import morgan from 'morgan';
-import dotenv from 'dotenv';
-import passport from 'passport';
-import hpp from 'hpp';
-import helmet from 'helmet';
+import * as cors from 'cors'; // Access-Control-Allow-Origin
+import * as morgan from 'morgan';
+import * as dotenv from 'dotenv';
+import * as passport from 'passport';
+import * as hpp from 'hpp';
+import * as helmet from 'helmet'; // 웹보안
 import passportConfig from './passport';
 import { sequelize } from './models';
 
@@ -12,6 +13,7 @@ import userRouter from './routes/user';
 
 dotenv.config();
 const app = express();
+passportConfig();
 const prod: boolean = process.env.NODE_ENV === 'production';
 
 app.set('port', prod ? process.env.PORT : 3065);
@@ -22,13 +24,16 @@ sequelize.sync({ force: false })
   .catch((err: Error) => {
     console.error(err);
   });
-passportConfig();
 if (prod) {
   app.use(hpp());
-  app.use(helmet());
+  app.use(helmet()); 
   app.use(morgan('combined'));
 } else {
   app.use(morgan('dev'));
+    app.use(cors({
+    origin: true, // 지금은 테스트니깐 origin : true
+    credentials: true,
+  }))
 }
 
 app.use(passport.initialize());

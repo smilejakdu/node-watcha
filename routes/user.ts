@@ -1,12 +1,13 @@
 
-import express from 'express';
+import * as express from 'express';
+ 
 import { Request } from 'express';
-import bcrypt from 'bcrypt';
-import passport from 'passport';
+import * as bcrypt from 'bcrypt';
+import * as passport from 'passport';
 
 import User from '../models/user';
 import Board from '../models/board';
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 import { jwtObj } from "../config/jwt"
 
 const router = express.Router();
@@ -40,15 +41,16 @@ router.post('/signup', async (req, res, next) => {
 
 router.post('/login', async (req, res, next) => {
   passport.authenticate('local', (err: Error, user: User, info: { message: string }) => {
-    console.log("login result: " , req.body);
+    console.log("req.body: ", req.body); // { nickname: 'ash3', password: '123123' }
     if (err) {
         console.error(err);
         return next(err);
     }
+    console.log("info : " , info); // { message: 'Missing credentials' }
     if (info) {
         return res.status(401).send(info.message);
     }
-    console.log("login user : " , user);
+    console.log("login user : " , req.body);
     return req.login(user, async (loginErr: Error) => {
       try {
         if (loginErr) {
