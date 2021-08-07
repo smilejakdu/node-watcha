@@ -9,11 +9,8 @@ export default () => {
     usernameField: 'nickname',
     passwordField: 'password',
   }, async (nickname, password, done) => { // VerifyFunction
-    console.log("local nickname : " , nickname);
-    console.log("local password : " , password); 
     try {
       const user = await User.findOne({ where: { nickname } });
-      console.log("user : " , user);
       if (!user) {
         return done(null, false, { message: '존재하지 않는 사용자입니다!' });
       }

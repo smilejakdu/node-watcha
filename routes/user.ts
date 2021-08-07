@@ -41,16 +41,13 @@ router.post('/signup', async (req, res, next) => {
 
 router.post('/login', async (req, res, next) => {
   passport.authenticate('local', (err: Error, user: User, info: { message: string }) => {
-    console.log("req.body: ", req.body); // { nickname: 'ash3', password: '123123' }
     if (err) {
         console.error(err);
         return next(err);
     }
-    console.log("info : " , info); // { message: 'Missing credentials' }
     if (info) {
         return res.status(401).send(info.message);
     }
-    console.log("login user : " , req.body);
     return req.login(user, async (loginErr: Error) => {
       try {
         if (loginErr) {
@@ -66,9 +63,9 @@ router.post('/login', async (req, res, next) => {
           attributes: { exclude: ['password'] },
         });
         // jwt token 생성
-        // const token = jwt.sign({ id: user.id }, jwtObj.secret , {algorithm : 'RS256'});
-        // fullUser.token = token;
-        return res.json(fullUser);
+        const token = jwt.sign({ id: user.nickname }, jwtObj.secret , { expiresIn : '2day'});
+        // return res.status(200).json(fullUser);
+        return res.status(200).json([{'access' : token , 'user' : user.nickname}]);
       } catch (e) {
         console.error(e);
         return next(e);
