@@ -1,4 +1,4 @@
-declare function verify(
-   token: string,
+export function verify(
+   token: string|object,
    secretOrPublicKey: string | Buffer,
 ): object | string;

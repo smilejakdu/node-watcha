@@ -2,14 +2,17 @@ import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import { jwtObj } from "../config/jwt"
 
-const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
+const isLoggedIn = (req: any, res: Response, next: NextFunction) => {
+  // req : Request 이렇게 다시 고쳐야 한다.
   try {
     if(!req.headers){
       return res.status(419).json({code: 400,message: "does not exist headers"});
     }
-    let decode = jwt.verify(req.headers.authentication, jwtObj.secret);
-    console.log("middleware decode : " , decode);
-    req.decoded = decode;
+    let decode = jwt.verify(String(req.headers.authentication), jwtObj.secret);
+
+    console.log("middleware decode2 : ", decode);
+    const decoded = decode;
+    req.decoded = decoded;
     next();
     // 인증 실패
   } catch (error) {
@@ -23,12 +26,12 @@ const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const isNotLoggedIn = (req: Request, res: Response, next: NextFunction) => {
-    if (!req.isAuthenticated()) {
-        next();
-    } else {
-        res.status(401).send('로그인한 사용자는 접근할 수 없습니다.');
-    }
+  if (!req.isAuthenticated()) {
+    next();
+  } else {
+    res.status(401).send('로그인한 사용자는 접근할 수 없습니다.');
+  }
 };
 
 
-export { isLoggedIn, isNotLoggedIn , verifyToken };
+export { isLoggedIn, isNotLoggedIn };

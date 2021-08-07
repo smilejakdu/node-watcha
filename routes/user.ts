@@ -64,7 +64,7 @@ router.post('/login', async (req, res, next) => {
           attributes: { exclude: ['password'] },
         });
         // jwt token 생성
-        const token = jwt.sign({ id: user.nickname }, jwtObj.secret , { expiresIn : '2day'});
+        const token = jwt.sign({ id: user.id }, jwtObj.secret , { expiresIn : '2day'});
         // return res.status(200).json(fullUser);
         return res.status(200).json([{'access' : token , 'user' : user.nickname}]);
       } catch (e) {
@@ -75,14 +75,14 @@ router.post('/login', async (req, res, next) => {
   })(req, res, next);
 });
 
-router.patch('/nickname', isLoggedIn, async (req, res, next) => {
+router.patch('/nickname', isLoggedIn, async (req:any, res, next) => {
   try {
     await User.update({
       nickname: req.body.nickname,
     }, {
-      where: { id: req.user!.id },
+      where: { id: req.decoded.id },
     });
-    res.send(req.body.nickname);
+    res.status(200).send(req.body.nickname);
   } catch (e) {
     console.error(e);
     next(e);
