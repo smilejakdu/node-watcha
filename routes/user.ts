@@ -5,6 +5,7 @@ import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import * as passport from 'passport';
 
+import { isLoggedIn, isNotLoggedIn } from './middleware';
 import User from '../models/user';
 import Board from '../models/board';
 import * as jwt from "jsonwebtoken";
@@ -72,6 +73,20 @@ router.post('/login', async (req, res, next) => {
       }
     });
   })(req, res, next);
+});
+
+router.patch('/nickname', isLoggedIn, async (req, res, next) => {
+  try {
+    await User.update({
+      nickname: req.body.nickname,
+    }, {
+      where: { id: req.user!.id },
+    });
+    res.send(req.body.nickname);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
 });
 
 export default router;
