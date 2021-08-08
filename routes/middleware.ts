@@ -2,13 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import { jwtObj } from "../config/jwt"
 
-const isLoggedIn = (req: any, res: Response, next: NextFunction) => {
-  // req : Request 이렇게 다시 고쳐야 한다.
+
+const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
   try {
     if(!req.headers){
       return res.status(419).json({code: 400,message: "does not exist headers"});
     }
-    let decode = jwt.verify(String(req.headers.authentication), jwtObj.secret);
+    let decode = jwt.verify(req.headers.authentication, jwtObj.secret);
 
     console.log("middleware decode2 : ", decode);
     const decoded = decode;
