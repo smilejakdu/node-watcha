@@ -4,7 +4,6 @@ import {
 } from 'sequelize';
 import { dbType } from './index';
 import { sequelize } from './sequelize';
-import User from './user';
 import Review from './review';
 
 class Board extends Model {
@@ -21,6 +20,10 @@ class Board extends Model {
 }
 
 Board.init({
+  title: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+  },
   content: {
     type: DataTypes.TEXT,
     allowNull: false,

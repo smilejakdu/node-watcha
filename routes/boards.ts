@@ -9,6 +9,7 @@ import Board from '../models/board';
 const router = express.Router();
 
 router.get<any, any, any, { lastId: string, limit: string }>('/', async (req: Request<any, any, any, { lastId: string, limit: string }>, res, next) => {
+  // localhost:3065/boards?lastId=10&limit=2
   try {
     let where = {};
     if (parseInt(req.query.lastId, 10)) { // req.query.lastId 을 10 진법으로 변환

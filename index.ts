@@ -6,11 +6,13 @@ import * as dotenv from 'dotenv';
 import * as passport from 'passport';
 import * as hpp from 'hpp';
 import * as helmet from 'helmet'; // 웹보안
+
 import passportConfig from './passport';
 import { sequelize } from './models';
 
 import userRouter from './routes/user';
 import boardsRouter from './routes/boards';
+import boardRouter from './routes/board';
 
 dotenv.config();
 const app = express();
@@ -43,6 +45,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/users', userRouter);
 app.use('/boards', boardsRouter);
+app.use('/board', boardRouter);
 
 app.get('/', (req, res, next) => {
   res.send('react nodebird 백엔드 정상 동작!');

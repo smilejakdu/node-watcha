@@ -4,36 +4,37 @@ import * as express from 'express';
 import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import * as passport from 'passport';
+import * as jwt from "jsonwebtoken";
 
-import { isLoggedIn, isNotLoggedIn } from './middleware';
+import { isLoggedIn } from './middleware';
 import User from '../models/user';
 import Board from '../models/board';
-import * as jwt from "jsonwebtoken";
+
 import { jwtObj } from "../config/jwt"
 import { AuthRequest, AuthRequestHeader } from "../types/custom_request";
 
 const router = express.Router();
 
 router.post('/signup', async (req, res, next) => {
-    console.log("req result: " , req.body);
-    try {
-        const exUser = await User.findOne({
-            where: {
-                nickname: req.body.nickname,
-            },
-        });
-        if (exUser) {
-            return res.status(403).send('이미 사용 중인 아이디입니다.');
-        }
-        const hashedPassword = await bcrypt.hash(req.body.password, 12);
-      
-        const newUser = await User.create({
-            nickname: req.body.nickname,
-            password: hashedPassword,
-        });
-        console.log("newUser :" , newUser);
-      
-        return res.status(200).json(newUser);
+  console.log("req result: " , req.body);
+  try {
+    const exUser = await User.findOne({
+      where: {
+        nickname: req.body.nickname,
+      },
+    });
+    if (exUser) {
+      return res.status(403).send('이미 사용 중인 아이디입니다.');
+    }
+    const hashedPassword = await bcrypt.hash(req.body.password, 12);
+  
+    const newUser = await User.create({
+        nickname: req.body.nickname,
+        password: hashedPassword,
+    });
+    console.log("newUser :", newUser);
+
+    return res.status(200).json(newUser);
     } catch (error) {
         console.error(error);
         next(error);

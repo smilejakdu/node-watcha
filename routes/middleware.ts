@@ -18,10 +18,10 @@ const isLoggedIn = (req: AuthRequest, res: Response, next: NextFunction) => {
   } catch (error) {
     // 유효기간이 초과된 경우
     if (error.name === "TokenExpiredError") {
-      return res.status(419).json({code: 419,message: "expired token"});
+      return res.status(419).send("expired token");
     }
     // 토큰의 비밀키가 일치하지 않는 경우
-    return res.status(401).json({code: 401,message: "invalid token"});
+    return res.status(401).send("invalid token");
   }
 };
 
