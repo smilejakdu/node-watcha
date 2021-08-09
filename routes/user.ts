@@ -92,4 +92,51 @@ router.patch<any, any, any>('/nickname', isLoggedIn, async (req: AuthRequest, re
   }
 });
 
+interface IUser extends User {
+    BoardCount: number;
+}
+
+router.get('/:id', async (req, res, next) => {
+    try {
+        const user = await User.findOne({
+            where: { id: parseInt(req.params.id, 10) },
+            include: [{
+                model: Board,
+                as: 'Boards',
+                attributes: ['id'],
+            }],
+            attributes: ['id', 'nickname'],
+        });
+        if (!user) {
+            return res.status(404).send('no user');
+        }
+        const jsonUser = user.toJSON() as IUser;
+        jsonUser.BoardCount = jsonUser.Boards ? jsonUser.Boards.length : 0;
+        return res.json(jsonUser);
+    } catch (err) {
+        console.error(err);
+        return next(err);
+    }
+});
+
+router.get('/:id/boards', async (req, res, next) => {
+    try {
+        const posts = await Board.findAll({
+          where: { // where 에 다가 조건을 걸어둔다.
+            // join 걸려있는 UserId 에 따른 Board 를 가져온다. 1 : N 관계
+            UserId: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
+          },
+          include: [{ // include : 하위 테이블 조인
+            model: User,
+            attributes: ['id', 'nickname'], // 해당 테이블에서 조회 하려는 컬럼 배열
+          }],
+          order: [['createdAt', 'DESC']], // 순서정렬
+        });
+        res.json(posts);
+      } catch (e) {
+        console.error(e);
+        next(e);
+      }
+});
+
 export default router;

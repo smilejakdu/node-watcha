@@ -10,6 +10,7 @@ import passportConfig from './passport';
 import { sequelize } from './models';
 
 import userRouter from './routes/user';
+import boardsRouter from './routes/boards';
 
 dotenv.config();
 const app = express();
@@ -41,6 +42,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/users', userRouter);
+app.use('/boards', boardsRouter);
 
 app.get('/', (req, res, next) => {
   res.send('react nodebird 백엔드 정상 동작!');

@@ -2,7 +2,7 @@
   "name": "node-watcha",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "dev": "nodemon",
     "start": "tsc && node index"

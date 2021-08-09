@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import { jwtObj } from "../config/jwt"
-import { JwtPayload } from "jsonwebtoken";
 import { AuthRequest , AuthRequestHeader } from "../types/custom_request";
 
 
