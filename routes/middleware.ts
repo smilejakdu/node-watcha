@@ -1,16 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import { jwtObj } from "../config/jwt"
-import { IncomingHttpHeaders } from 'http';
 import { JwtPayload } from "jsonwebtoken";
+import { AuthRequest , AuthRequestHeader } from "../types/custom_request";
 
-interface AuthRequest extends Request {
-  decoded?: JwtPayload | string;
-}
-
-interface AuthRequestHeader extends IncomingHttpHeaders {
-  authentication: string;
-}
 
 const isLoggedIn = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

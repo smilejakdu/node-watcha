@@ -10,6 +10,7 @@ import User from '../models/user';
 import Board from '../models/board';
 import * as jwt from "jsonwebtoken";
 import { jwtObj } from "../config/jwt"
+import { AuthRequest, AuthRequestHeader } from "../types/custom_request";
 
 const router = express.Router();
 
@@ -75,12 +76,14 @@ router.post('/login', async (req, res, next) => {
   })(req, res, next);
 });
 
-router.patch<any, any, any>('/nickname', isLoggedIn, async (req: any, res, next) => {
+router.patch<any, any, any>('/nickname', isLoggedIn, async (req: AuthRequest, res, next) => {
+  const reqDecoded = req.decoded as AuthRequestHeader
+
   try {
     await User.update({
       nickname: req.body.nickname,
     }, {
-      where: { id: req.decoded.id },
+      where: { id: reqDecoded.id },
     });
     res.status(200).send(req.body.nickname);
   } catch (e) {
