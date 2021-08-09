@@ -75,7 +75,7 @@ router.post('/login', async (req, res, next) => {
   })(req, res, next);
 });
 
-router.patch('/nickname', isLoggedIn, async (req:any, res, next) => {
+router.patch<any, any, any>('/nickname', isLoggedIn, async (req: any, res, next) => {
   try {
     await User.update({
       nickname: req.body.nickname,

@@ -1,10 +1,5 @@
-// declare function verify(
-//    token: string|object,
-//    secretOrPublicKey: string | Buffer,
-// ): object | string;
-
-import * as jwt from "jsonwebtoken";
-
-declare global {
-   namespace
-}
+// declare module "jsonwebtoken" {
+//    export function verify(token: any,
+//       secretOrPublicKey: string,
+//       options: any): string;
+// }
