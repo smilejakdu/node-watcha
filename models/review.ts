@@ -22,8 +22,9 @@ Review.init({
   collate: 'utf8mb4_general_ci',
 });
 
-export const associate =(db: dbType) => {
-
+export const associate = (db: dbType) => {
+  db.Review.belongsTo(db.User);
+  db.Review.belongsTo(db.Board);
 };
 
 export default Review;

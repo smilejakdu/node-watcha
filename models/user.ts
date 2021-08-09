@@ -43,7 +43,8 @@ User.init({
 
 export const associate = (db: dbType) => {
   // User는 게시판을 여러개 가지고 있어서 hasMany
-  db.User.hasMany(db.Board, { as: 'Boards' });
+  db.User.hasMany(db.Board, { as: 'Boards' }); 
+  db.User.hasMany(db.Review);
 };
 
 export default User;

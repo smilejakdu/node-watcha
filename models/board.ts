@@ -1,7 +1,11 @@
-import { DataTypes, Model } from 'sequelize';
+import {
+  DataTypes, Model,
+  HasManyAddAssociationMixin
+} from 'sequelize';
 import { dbType } from './index';
 import { sequelize } from './sequelize';
 import User from './user';
+import Review from './review';
 
 class Board extends Model {
 	public readonly id!: number;
@@ -11,6 +15,8 @@ class Board extends Model {
   public readonly updatedAt!: Date;
 
   public UserId!: number;
+
+  public addComment!: HasManyAddAssociationMixin<Review, number>;
 
 }
 
@@ -29,7 +35,8 @@ Board.init({
 
 export const associate = (db: dbType) => {
   // Board 는 User 에 연관되어있으니깐 belongsTo
-  db.Board.belongsTo(db.User);
+  db.Board.belongsTo(db.User); // board 는 user 에 속해있다.
+  db.Board.hasMany(db.Review); // board 하나에 review 여러개
 };
 
 export default Board;
