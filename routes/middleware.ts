@@ -1,17 +1,26 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import { jwtObj } from "../config/jwt"
+import { IncomingHttpHeaders } from 'http';
+import { JwtPayload } from "jsonwebtoken";
 
-const isLoggedIn = (req:any, res: Response, next: NextFunction) => {
+interface AuthRequest extends Request {
+  decoded?: JwtPayload | string;
+}
+
+interface AuthRequestHeader extends IncomingHttpHeaders {
+  authentication: string;
+}
+
+const isLoggedIn = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if(!req.headers){
       return res.status(419).json({code: 400,message: "does not exist headers"});
     }
-    let decode = jwt.verify(String(req.headers.authentication), jwtObj.secret);
 
-    console.log("middleware decode2 : ", decode);
-    const decoded = decode;
-    req.decoded = decoded;
+    const authRequestHeaders = req.headers as AuthRequestHeader;
+
+    req.decoded = jwt.verify(authRequestHeaders.authentication, jwtObj.secret);
     next();
     // 인증 실패
   } catch (error) {
