@@ -28,7 +28,7 @@ router.get<any, any, any, { lastId: string, limit: string }>('/', async (req: Re
       order: [['createdAt', 'DESC']], // DESC는 내림차순, ASC는 오름차순
       limit: parseInt(req.query.limit, 10),
     });
-    return res.json(boards);
+    return res.status(200).json(boards);
   } catch (err) {
     console.error(err);
     return next(err);

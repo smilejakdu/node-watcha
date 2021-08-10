@@ -1,8 +1,7 @@
-import * as express from "express"
+import * as express from 'express';
 
-import Board from '../models/board';
 import User from '../models/user';
-import Review from '../models/review';
+import Scheduler from '../models/scheduler';
 
 import { isLoggedIn } from './middleware';
 import { AuthRequest, AuthRequestHeader } from "../types/custom_request";
@@ -11,21 +10,23 @@ const router = express.Router();
 
 router.post<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) => { // POST /api/board
 	const reqDecoded = req.decoded as AuthRequestHeader
+
   try {
-		const newBoard = await Board.create({
+		const newScheduler = await Scheduler.create({
+			date: req.body.date,
+			genre: req.body.genre, 
 			title: req.body.title,
-      content: req.body.content, 
       UserId: reqDecoded.id,
 		});
 
-    const fullBoard = await Board.findOne({
-      where: { id: newBoard.id }, // 조건문 
+    const fullScheduler = await Scheduler.findOne({
+      where: { id: newScheduler.id }, // 조건문 
       include: [{ // 하위 테이블 조인
         model: User,
         attributes: ['id', 'nickname'],
 			}],
     });
-		return res.status(201).json(fullBoard);
+		return res.status(201).json(fullScheduler);
 
   } catch (e) {
     console.error(e);
@@ -36,54 +37,54 @@ router.post<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) 
 router.put<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) => {
   const reqDecoded = req.decoded as AuthRequestHeader
   try {
-		await Board.update({
-			title : req.body.title,
-      content: req.body.content,
+		await Scheduler.update({
+			date : req.body.date,
+			genre: req.body.genre,
+			title: req.body.title,
     }, {
       where: { id: req.body.id , UserId : reqDecoded.id },
 		});
 		
-		const fullUpdateBoard = await Board.findOne({
+		const fullUpdateScheduler = await Scheduler.findOne({
 			where: { id: req.body.id , UserId : reqDecoded.id}, // 조건문
 			include: [{ // 하위 테이블 조인
         model: User,
         attributes: ['id', 'nickname'], // 해당 테이블에서 조회
 			}]
 		});
-    res.status(200).json(fullUpdateBoard);
+    res.status(200).json(fullUpdateScheduler);
   } catch (e) {
     console.error(e);
     next(e);
   }
 });
 
-
-router.get('/:id', async (req, res, next) => {
-  try {
-    const board = await Board.findOne({
-      where: { id: req.params.id },
-      include: [{
-        model: User,
-        attributes: ['id', 'nickname'],
-			}],
-    });
-    return res.status(200).json(board);
-  } catch (e) {
-    console.error(e);
-    return next(e);
-  }
+router.get('/', async (req, res, next) => {
+    try {
+			const schedulers = await Scheduler.findAll({
+          include: [{ // include : 하위 테이블 조인
+            model: User,
+            attributes: ['id', 'nickname'], // 해당 테이블에서 조회 하려는 컬럼 배열
+          }],
+          order: [['createdAt', 'DESC']], // 순서정렬
+        });
+        return res.status(200).json(schedulers);
+      } catch (e) {
+        console.error(e);
+        next(e);
+      }
 });
 
 router.delete<any, any, any>('/:id', isLoggedIn, async (req: AuthRequest, res, next) => { 
   const reqDecoded = req.decoded as AuthRequestHeader
 
   try {
-    const board = await Board.findOne({ where: { id: req.params.id , UserId : reqDecoded.id} });
-    if (!board) {
-      return res.status(404).send('게시판이 존재하지 않습니다.');
+    const scheduler = await Scheduler.findOne({ where: { id: req.params.id , UserId : reqDecoded.id} });
+    if (!scheduler) {
+      return res.status(404).send('스케쥴이 존재하지 않습니다.');
     }
-    await Board.destroy({ where: { id: req.params.id } });
-    return res.status(200).json(board);
+    await Scheduler.destroy({ where: { id: req.params.id } });
+    return res.status(200).json(scheduler);
   } catch (e) {
     console.error(e);
     return next(e);
