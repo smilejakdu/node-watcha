@@ -50,7 +50,7 @@ router.put<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) =
         attributes: ['id', 'nickname'], // 해당 테이블에서 조회
 			}]
 		});
-    res.status(200).json(fullUpdateBoard);
+    return res.status(200).json(fullUpdateBoard);
   } catch (e) {
     console.error(e);
     next(e);
@@ -61,11 +61,14 @@ router.put<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) =
 router.get('/:id', async (req, res, next) => {
   try {
     const board = await Board.findOne({
-      where: { id: req.params.id },
+      where : { id: req.params.id },
       include: [{
-        model: User,
-        attributes: ['id', 'nickname'],
-			}],
+          model: User,
+          attributes: ['id', 'nickname'],
+        },{
+          model: Review,
+          attributes: ['id', 'content' , 'UserId'],
+        }],
     });
     return res.status(200).json(board);
   } catch (e) {

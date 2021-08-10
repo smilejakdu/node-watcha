@@ -8,7 +8,7 @@ import { AuthRequest, AuthRequestHeader } from "../types/custom_request";
 
 const router = express.Router();
 
-router.post<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) => { // POST /api/board
+router.post<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) => { 
 	const reqDecoded = req.decoded as AuthRequestHeader
 
   try {
