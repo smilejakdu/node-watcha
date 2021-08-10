@@ -57,7 +57,6 @@ router.put<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) =
   }
 });
 
-
 router.get('/:id', async (req, res, next) => {
   try {
     const board = await Board.findOne({

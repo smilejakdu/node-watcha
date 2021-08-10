@@ -91,4 +91,72 @@ router.delete<any, any, any>('/:id', isLoggedIn, async (req: AuthRequest, res, n
   }
 });
 
+router.get('/analysis', async (req, res, next) => {
+  try {
+    const schedulers = await Scheduler.findAll({
+        attributes: ['genre'], // 해당 테이블에서 조회 하려는 컬럼 배열
+    });
+
+    interface MovieData {
+      [key: string]: number;
+    }
+
+    const movieData: MovieData = {
+      action : 0,
+      fear : 0,
+      comic : 0,
+      romance : 0,
+      drama : 0,
+      comic_romance : 0,
+    }
+
+    schedulers.forEach(scheduler => {
+      movieData[`${scheduler}`] += 1
+    });
+
+    return res.status(200).json(movieData);
+    } catch (e) {
+      console.error(e);
+      next(e);
+    }
+});
+
+router.get<any, any, any>('/polar', isLoggedIn, async (req: AuthRequest, res, next) => { 
+  const reqDecoded = req.decoded as AuthRequestHeader
+
+  try {
+    const schedulers = await Scheduler.findAll({
+      where: {
+          UserId: reqDecoded.id,
+        },
+        include: [{ // include : 하위 테이블 조인
+          model: User,
+          attributes: ['id', 'nickname'], // 해당 테이블에서 조회 하려는 컬럼 배열
+        }],
+    });
+    
+    interface MovieData {
+      [key: string]: number;
+    }
+
+    const movieData: MovieData = {
+      action : 0,
+      fear : 0,
+      comic : 0,
+      romance : 0,
+      drama : 0,
+      comic_romance : 0,
+    }
+
+    schedulers.forEach(scheduler => {
+      movieData[`${scheduler}`] += 1
+    });
+
+      return res.status(200).json(movieData);
+    } catch (e) {
+      console.error(e);
+      next(e);
+    }
+});
+
 export default router;
