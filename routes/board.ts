@@ -14,7 +14,6 @@ const router = express.Router();
 router.post<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) => { // POST /api/board
 	const reqDecoded = req.decoded as AuthRequestHeader
   try {
-		console.log("board req : " , req.body);
 		const newBoard = await Board.create({
 			title: req.body.title,
       content: req.body.content, 
@@ -60,9 +59,7 @@ router.put<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) =
   }
 });
 
-
 router.put<any, any, any>('/:id', isLoggedIn, async (req: AuthRequest, res, next) => {
-	const reqDecoded = req.decoded as AuthRequestHeader
   try {
     const board = await Board.findOne({ where: { id: req.params.id } });
     if (!board) {
