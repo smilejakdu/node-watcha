@@ -10,57 +10,79 @@ import * as helmet from 'helmet'; // 웹보안
 import passportConfig from './passport';
 import { sequelize } from './models';
 
-import userRouter from './routes/user';
-import boardsRouter from './routes/boards';
-import boardRouter from './routes/board';
-import schedulerRouter from './routes/scheduler';
-import reviewRouter from './routes/review';
-
+import userController from './routes/user/user.controller';
+import boardController from './routes/boards/board.controller';
+import schedulerController from './routes/scheduler/scheduler.controller';
+import reviewController from './routes/reviews/review.controller';
 
 dotenv.config();
-const app = express();
-passportConfig();
-const prod: boolean = process.env.NODE_ENV === 'production';
 
-app.set('port', prod ? process.env.PORT : 3065);
-sequelize.sync({ force: false })
-  .then(() => {
-    console.log('데이터베이스 연결 성공');
-  })
-  .catch((err: Error) => {
-    console.error(err);
-  });
-if (prod) {
-  app.use(hpp());
-  app.use(helmet()); 
-  app.use(morgan('combined'));
-} else {
-  app.use(morgan('dev'));
-    app.use(cors({
-    origin: true, // 지금은 테스트니깐 origin : true
-    credentials: true,
-  }))
+class Server {
+  app: express.Application
+
+  constructor() {
+    const app: express.Application = express();
+    this.app = app;
+    passportConfig();
+  }
+
+  private setRoute() {
+    this.app.use(userController);
+    this.app.use(boardController);
+    this.app.use(schedulerController);
+    this.app.use(reviewController);
+  }
+
+  private setMiddleware() {
+    const prod: boolean = process.env.NODE_ENV === 'production';
+    this.app.set('port', prod ? process.env.PORT : 3065);
+    this.app.use(passport.initialize());
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+    sequelize.sync({ force: false })
+    .then(() => {
+      console.log('데이터베이스 연결 성공');
+    })
+    .catch((err: Error) => {
+      console.error(err);
+    });
+  if (prod) {
+    this.app.use(hpp());
+    this.app.use(helmet()); 
+    this.app.use(morgan('combined'));
+  } else {
+    this.app.use(morgan('dev'));
+      this.app.use(cors({
+      origin: true, // 지금은 테스트니깐 origin : true
+      credentials: true,
+    }))
+  }
+  }
+
+  public listen(){
+    this.setMiddleware();
+    this.setRoute();
+    
+    this.app.get('/', (req, res, next) => {
+      res.send('react nodebird 백엔드 정상 동작!');
+    });
+
+    this.app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+      console.error(err);
+      res.status(500).send('서버 에러 발생! 서버 콘솔을 확인하세요.');
+    });
+
+    this.app.listen(this.app.get('port'), () => {
+      console.log(`server is running on ${this.app.get('port')}`);
+    });
+  }
 }
 
-app.use(passport.initialize());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const appInit = () => {
+  const server = new Server();  
+  server.listen();
+}
 
-app.use('/users', userRouter);
-app.use('/boards', boardsRouter);
-app.use('/board', boardRouter);
-app.use('/review', reviewRouter);
-app.use('/scheduler', schedulerRouter);
+appInit();
 
-app.get('/', (req, res, next) => {
-  res.send('react nodebird 백엔드 정상 동작!');
-});
 
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(err);
-  res.status(500).send('서버 에러 발생! 서버 콘솔을 확인하세요.');
-});
-
-app.listen(app.get('port'), () => {
-  console.log(`server is running on ${app.get('port')}`);
-});

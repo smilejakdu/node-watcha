@@ -1,21 +1,20 @@
 
 import * as express from 'express';
  
-import { Request } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import * as passport from 'passport';
 import * as jwt from "jsonwebtoken";
 
-import { isLoggedIn } from './middleware';
-import User from '../models/user';
-import Board from '../models/board';
+import User from '../../models/user';
+import Board from '../../models/board';
 
-import { jwtObj } from "../config/jwt"
-import { AuthRequest, AuthRequestHeader } from "../types/custom_request";
+import {jwtObj} from "../../config/jwt/jwt"
+import { AuthRequest, AuthRequestHeader } from "../../types/custom_request";
 
 const router = express.Router();
 
-router.post('/signup', async (req, res, next) => {
+export const signUp = async (req: Request, res: Response , next:NextFunction) => {
   console.log("req result: " , req.body);
   try {
     const exUser = await User.findOne({
@@ -38,11 +37,10 @@ router.post('/signup', async (req, res, next) => {
     } catch (error) {
         console.error(error);
         next(error);
-    }
-});
+    } 
+}
 
-
-router.post('/login', async (req, res, next) => {
+export const logIn = async (req :Request, res:Response, next:NextFunction) => {
   passport.authenticate('local', (err: Error, user: User, info: { message: string }) => {
     if (err) {
         console.error(err);
@@ -75,11 +73,10 @@ router.post('/login', async (req, res, next) => {
       }
     });
   })(req, res, next);
-});
+};
 
-router.patch<any, any, any>('/nickname', isLoggedIn, async (req: AuthRequest, res, next) => {
+export const updateUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const reqDecoded = req.decoded as AuthRequestHeader
-
   try {
     await User.update({
       nickname: req.body.nickname,
@@ -91,53 +88,52 @@ router.patch<any, any, any>('/nickname', isLoggedIn, async (req: AuthRequest, re
     console.error(e);
     next(e);
   }
-});
+}
 
 interface IUser extends User {
     BoardCount: number;
 }
 
-router.get('/:id', async (req, res, next) => {
+export const getUser = async (req: AuthRequest, res: Response, next: NextFunction)=>{
     try {
-        const user = await User.findOne({
-            where: { id: parseInt(req.params.id, 10) },
-            include: [{
-                model: Board,
-                as: 'Boards',
-                attributes: ['id'],
-            }],
-            attributes: ['id', 'nickname'],
-        });
-        if (!user) {
-            return res.status(404).send('no user');
-        }
-        const jsonUser = user.toJSON() as IUser;
-        jsonUser.BoardCount = jsonUser.Boards ? jsonUser.Boards.length : 0;
-        return res.json(jsonUser);
-    } catch (err) {
-        console.error(err);
-        return next(err);
-    }
-});
-
-router.get('/:id/boards', async (req, res, next) => {
-    try {
-        const posts = await Board.findAll({
-          where: { // where 에 다가 조건을 걸어둔다.
-            // join 걸려있는 UserId 에 따른 Board 를 가져온다. 1 : N 관계
-            UserId: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
-          },
-          include: [{ // include : 하위 테이블 조인
-            model: User,
-            attributes: ['id', 'nickname'], // 해당 테이블에서 조회 하려는 컬럼 배열
+      const user = await User.findOne({
+          where: { id: parseInt(req.params.id, 10) },
+          include: [{
+              model: Board,
+              as: 'Boards',
+              attributes: ['id'],
           }],
-          order: [['createdAt', 'DESC']], // 순서정렬
-        });
-        res.json(posts);
-      } catch (e) {
-        console.error(e);
-        next(e);
+          attributes: ['id', 'nickname'],
+      });
+      if (!user) {
+          return res.status(404).send('no user');
       }
-});
+      const jsonUser = user.toJSON() as IUser;
+      jsonUser.BoardCount = jsonUser.Boards ? jsonUser.Boards.length : 0;
+      return res.json(jsonUser);
+  } catch (err) {
+      console.error(err);
+      return next(err);
+  }
+}
+export const getUserBoards = async (req: Request, res: Response, next: NextFunction)=>{
+  try {
+    const posts = await Board.findAll({
+      where: { // where 에 다가 조건을 걸어둔다.
+        // join 걸려있는 UserId 에 따른 Board 를 가져온다. 1 : N 관계
+        UserId: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
+      },
+      include: [{ // include : 하위 테이블 조인
+        model: User,
+        attributes: ['id', 'nickname'], // 해당 테이블에서 조회 하려는 컬럼 배열
+      }],
+      order: [['createdAt', 'DESC']], // 순서정렬
+    });
+    res.json(posts);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+}
 
 export default router;

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
-import { jwtObj } from "../config/jwt"
+import { jwtObj } from "../config/jwt/jwt"
 import { AuthRequest , AuthRequestHeader } from "../types/custom_request";
 
 
@@ -15,7 +15,7 @@ const isLoggedIn = (req: AuthRequest, res: Response, next: NextFunction) => {
     req.decoded = jwt.verify(authRequestHeaders.authentication, jwtObj.secret);
     next();
     // 인증 실패
-  } catch (error) {
+  } catch (error :any) {
     // 유효기간이 초과된 경우
     if (error.name === "TokenExpiredError") {
       return res.status(419).send("expired token");

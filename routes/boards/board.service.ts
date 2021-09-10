@@ -1,15 +1,15 @@
 import * as express from "express"
 
-import Board from '../models/board';
-import User from '../models/user';
-import Review from '../models/review';
+import Board from '../../models/board';
+import User from '../../models/user';
+import Review from '../../models/review';
 
-import { isLoggedIn } from './middleware';
-import { AuthRequest, AuthRequestHeader } from "../types/custom_request";
+import { isLoggedIn } from '../middleware';
+import { AuthRequest, AuthRequestHeader } from "../../types/custom_request";
+import { NextFunction, Request, Response } from "express";
+import * as Sequelize from 'sequelize';
 
-const router = express.Router();
-
-router.post<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) => { // POST /api/board
+export const createBoard = async (req:AuthRequest, res:Response , next:NextFunction) => {
 	const reqDecoded = req.decoded as AuthRequestHeader
   try {
 		const newBoard = await Board.create({
@@ -31,9 +31,9 @@ router.post<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) 
     console.error(e);
     return next(e);
 	}
-});
+}
 
-router.put<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) => {
+export const updateBoard = async (req: AuthRequest, res: Response , next: NextFunction)=>{
   const reqDecoded = req.decoded as AuthRequestHeader
   try {
 		await Board.update({
@@ -55,9 +55,9 @@ router.put<any, any, any>('/', isLoggedIn, async (req: AuthRequest, res, next) =
     console.error(e);
     next(e);
   }
-});
+}
 
-router.get('/:id', async (req, res, next) => {
+export const getBoardId = async (req: Request, res: Response , next: NextFunction)=>{
   try {
     const board = await Board.findOne({
       where : { id: req.params.id },
@@ -74,9 +74,9 @@ router.get('/:id', async (req, res, next) => {
     console.error(e);
     return next(e);
   }
-});
+}
 
-router.delete<any, any, any>('/:id', isLoggedIn, async (req: AuthRequest, res, next) => { 
+export const deleteBoard = async (req: AuthRequest, res: Response , next: NextFunction)=>{
   const reqDecoded = req.decoded as AuthRequestHeader
 
   try {
@@ -90,6 +90,32 @@ router.delete<any, any, any>('/:id', isLoggedIn, async (req: AuthRequest, res, n
     console.error(e);
     return next(e);
   }
-});
+}
 
-export default router;
+export const totalBoards = async(req: any, res: Response , next: NextFunction)=>{
+  try {
+    let where = {};
+
+    if (parseInt(req.query.lastId, 10)) { // req.query.lastId 을 10 진법으로 변환
+      where = {
+        id: {
+          [Sequelize.Op.lt]: parseInt(req.query.lastId, 10), // less than
+        },
+      };
+    }
+    const boards = await Board.findAll({
+      where,
+      include: [{ // 하위 테이블 조인
+        model: User, // 하위 테이블 model
+        attributes: ['id', 'nickname'], // 해당 테이블에서 조회 할려는 칼럼 배열
+			}],
+      order: [['createdAt', 'DESC']], // DESC는 내림차순, ASC는 오름차순
+      limit: parseInt(req.query.limit, 10),
+    });
+
+    return res.status(200).json(boards);
+  } catch (err) {
+    console.error(err);
+    return next(err);
+  }
+}
